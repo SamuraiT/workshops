@@ -52,8 +52,8 @@ describe("contracts/Registry", function() {
       "function multicall(bytes[] calldata data) external",
     ])
     const calls = [
-      interface.encodeFunctionData("register", ["defender"]),
-      interface.encodeFunctionData("register", ["multicall-example"])
+      interface.encodeFunctionData("register", ["multicall-example"]),
+      interface.encodeFunctionData("register", ["defender-defender"]),
     ]
 
     const { request, signature } = await signMetaTxRequest(signer.provider, forwarder, {
@@ -62,10 +62,14 @@ describe("contracts/Registry", function() {
       data: registry.interface.encodeFunctionData('multicall', [calls]),
     });
 
-    await forwarder.execute(request, signature).then(tx => tx.wait());
+    expect(await registry.owners('defender-defender')).to.equal('0x0000000000000000000000000000000000000000');
+    expect(await registry.owners('multicall-example')).to.equal('0x0000000000000000000000000000000000000000');
 
-    expect(await registry.owners('defender')).to.equal(signer.address);
-    expect(await registry.owners('multicall-example')).to.equal(signer.address);
+    const result = await forwarder.execute(request, signature).then(tx => tx.wait());
+    console.log(result.events.map((event) => registry.interface.decodeEventLog('Registered', event.data, event.topics)))
+
+    expect(await registry.owners('defender-defender')).to.equal('0x656E646572000000000000000000000000000000');
+    expect(await registry.owners('multicall-example')).to.equal('0x616d706C65000000000000000000000000000000');
   });
 
   it("registers a name via a meta-tx", async function() {
