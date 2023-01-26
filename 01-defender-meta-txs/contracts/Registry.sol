@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "@openzeppelin/contracts/metatx/MinimalForwarder.sol";
-import "@openzeppelin/contracts/utils/Multicall.sol";
+import "./MulticallWithForwarder.sol";
 
 
-contract Registry is ERC2771Context, Multicall {
+contract Registry is ERC2771Context, MulticallWithForwarder {
     event Registered(address indexed who, string name);
 
     mapping(address => string) public names;
